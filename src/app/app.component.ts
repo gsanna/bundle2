@@ -47,7 +47,7 @@ interface QuestionDisplay {
         ]))
       ])
     ])
-  ]  
+  ]
 })
 export class AppComponent implements OnInit {
 
@@ -63,11 +63,12 @@ export class AppComponent implements OnInit {
   }
 
   title = 'quiz-editor';
-  
+
   myWidth = 250;
 
   quizzes: QuizDisplay[] = [];
   selectedQuiz: QuizDisplay = undefined;
+  newQuizzes: QuizDisplay[] = [];
 
   saveBatchEdits() {
     const editedQuizzes = this.getEditedQuizzes()
@@ -76,8 +77,13 @@ export class AppComponent implements OnInit {
         , orginalName: x.originalName
         , question: x.questions
       }));
-      
-    const addedQuizzes = [];
+
+    const addedQuizzes = this.getNewQuizzes()
+      .map(x => (
+        {quizName: x.name,
+        quizQuestions: x.questions
+          .map(x => x.name)}
+      ));
 
     this.quizSvc.saveQuizzes(editedQuizzes, addedQuizzes).subscribe(
       numberOfEditedQuizzesSaved => console.log(numberOfEditedQuizzesSaved)
@@ -113,7 +119,7 @@ export class AppComponent implements OnInit {
 
   get titleColor() {
     return this.myWidth > 250 ? "pink" : "black";
-  }  
+  }
 
   increaseWidth = () => {
     this.myWidth *= 1.5;
@@ -125,7 +131,7 @@ export class AppComponent implements OnInit {
 
   addNewQuiz() {
 
-    let newQuiz = { 
+    let newQuiz = {
       name: 'New Untitled Quiz'
       , originalName: 'New Untitled Quiz'
       , questions: []
@@ -134,11 +140,12 @@ export class AppComponent implements OnInit {
     };
 
     this.quizzes = [...this.quizzes, newQuiz];
+    this.newQuizzes = [...this.newQuizzes, newQuiz];
     this.setSelectedQuiz(newQuiz);
   }
 
   removeQuestion(questionToDelete) {
-    this.selectedQuiz.questions = 
+    this.selectedQuiz.questions =
       this.selectedQuiz.questions.filter(x => x !== questionToDelete);
   }
 
@@ -157,7 +164,7 @@ export class AppComponent implements OnInit {
 
   getEditedQuizzes() {
     return this.quizzes
-      .filter(x => 
+      .filter(x =>
         (!x.markedForDelete && x.originalName !== 'New Untitled Quiz')
         && (x.name != x.originalName || x.originalQuestionsChecksum != x.questions.map(x => x.name).join('~'))
       );
@@ -167,9 +174,13 @@ export class AppComponent implements OnInit {
     return this.getEditedQuizzes().length;
   }
 
+  getNewQuizzes() {
+    return this.newQuizzes;
+  }
+
   get numberOfAddedQuizzes() {
     return this.quizzes
-    .filter(x => 
+    .filter(x =>
         !x.markedForDelete
         && x.originalName === 'New Untitled Quiz'
     ).length;
@@ -191,11 +202,11 @@ export class AppComponent implements OnInit {
 
   jsPromisesOne() {
     const x = this.quizSvc.getNumberPromise(true);
-    console.log(x); // ? ? ? 
+    console.log(x); // ? ? ?
 
     x.then(
       n => {
-        console.log(n); // ? ? ? 
+        console.log(n); // ? ? ?
 
         const y = this.quizSvc.getNumberPromise(false);
         console.log(y); // ? ? ?
@@ -236,11 +247,11 @@ export class AppComponent implements OnInit {
 
       const results = await Promise.all([x, y]);
       //const results = await Promise.race([x, y]);
-      console.log(results); // ? ? ? 
+      console.log(results); // ? ? ?
     }
 
     catch(error) {
       console.log(error);
     }
-  }  
+  }
 }
